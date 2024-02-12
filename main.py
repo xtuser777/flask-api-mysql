@@ -88,7 +88,8 @@ def create():
         try:
             car = request.json
             cursor = conn.cursor()
-            cursor.execute(f"INSERT INTO `cars` (`brand`,`model`,`year`) VALUES ('{car['brand']}','{car['model']}',{car['year']})")
+            query = "INSERT INTO `cars` (`brand`,`model`,`year`) VALUES (%(brand)s,%(model)s,%(year)s)"
+            cursor.execute(query, car)
             conn.commit()
             cursor.close()
         except Error as err:
@@ -109,8 +110,10 @@ def update(id: int):
 
         try:
             car = request.json
+            car['id'] = id
             cursor = conn.cursor()
-            cursor.execute(f"UPDATE `cars` SET `brand` = '{car['brand']}',`model` = '{car['model']}',`year` = {car['year']} WHERE `id` = {id}")
+            query = "UPDATE `cars` SET `brand` = %(brand)s, `model` = %(model)s, `year` = %(year)s WHERE `id` = %(id)s"
+            cursor.execute(query, car)
             conn.commit()
             cursor.close()
         except Error as err:
@@ -129,7 +132,9 @@ def delete(id: int):
     if conn and conn.is_connected():
         try:
             cursor = conn.cursor()
-            cursor.execute(f"DELETE FROM `cars` WHERE `id` = {id}")
+            query = "DELETE FROM `cars` WHERE `id` = %(id)s"
+            params = { 'id': id }
+            cursor.execute(query, params)
             conn.commit()
             cursor.close()
         except Error as err:
